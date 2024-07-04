@@ -93,7 +93,7 @@ def main():
         combined_df = pd.concat(csv_files, ignore_index=True)
         filtered = combined_df.dropna(subset=["Debit"])
         filtered = filtered[filtered['Type'] != 'Payment']
-        #filtered = filtered[filtered['Description'] != 'MOBILE PAYMENT - THANK YOU']
+        filtered = filtered[filtered['Description'] != 'MOBILE PAYMENT - THANK YOU']
         
         sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore')
         if 'Debit' in sorted.columns:
