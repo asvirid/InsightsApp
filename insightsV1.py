@@ -101,10 +101,6 @@ def main():
         
         sorted['Category'] = sorted['Category'].fillna('Uncategorized')
         
-        '''for row in sorted['Category']:
-            if sorted['Category'][row] == 'Uncategorized':
-                sorted.replace('Uncategorized','Other Travel')'''
-            
         grouped_sum, grouped_entries = group_and_summarize(sorted, 'Category', 'Debit')
         print_table(grouped_sum, title="Grouped Summary by Category", max_width=max_col_widths)
 
