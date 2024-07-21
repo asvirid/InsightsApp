@@ -8,10 +8,27 @@ max_col_widths = {
     'Transaction Date': {'min': 2, 'max': 3},
     'Category': {'min': 44, 'max': 45},
     'Debit': {'min': 5, 'max': 15},
-    'Description': {'min': 9, 'max': 10},
+    'Description': {'min': 9, 'max': 25},
     'Card No.': {'min': 5, 'max': 7}
 }
 
+budget = {
+    'Merchandise': 100,
+    'Health & Wellness': 100,
+    'Shopping': 100,
+    'Entertainment': 100,
+    'Travel': 100,
+    'Other Services': 100,
+    'Groceries': 100,
+    'Other': 100,
+    'Food & Drink': 100,
+    'Other Travel': 100,
+    'Health Care': 100,
+    'Education': 100,
+    'Dining': 100,
+    'Fees & Adjustments': 100,
+    'Uncategorized': 100,
+}
 def parse_dates(dates):
     formatted_dates = []
 
@@ -79,7 +96,7 @@ def print_table(df, title=None, sum=None, max_col_widths=None):
     print(tabulate(df, headers='keys', tablefmt='rounded_outline', showindex=False))
 
 def group_and_summarize(df, group_by_col, sum_col):
-    grouped = df.groupby(group_by_col)[sum_col].sum().reset_index().sort_values(by='Debit', ascending = False)
+    grouped = df.groupby(group_by_col)[sum_col].sum().reset_index().sort_values(by='Debit', ascending = False).round(2)
     
     grouped_entries = df.groupby(group_by_col)
     return grouped, grouped_entries
@@ -87,31 +104,37 @@ def group_and_summarize(df, group_by_col, sum_col):
 
 def main():
     print("i am working!")
-    dir = input("Where are your bank statements csvs? (provide the filepath in the format of /Users/user/Path/toYour/folder without "")\n")
+    #dir = input("Where are your bank statements csvs? (provide the filepath in the format of /Users/user/Path/toYour/folder without "")\n")
+    month = str(input("Which month do you want to see summary for?(provide the month in lowercase format )\n"))
+    dir = "/Users/nafanya/Desktop/statements_insights/" + month
     csv_files = read_files(dir)
 
     if csv_files:
         combined_df = pd.concat(csv_files, ignore_index=True)
         filtered = combined_df.dropna(subset=["Debit"])
-        filtered = filtered[filtered['Type'] != 'Payment']
+        if filtered.columns.__contains__ == 'Type':
+            filtered = filtered[filtered['Type'] != 'Payment']
         filtered = filtered[filtered['Description'] != 'MOBILE PAYMENT - THANK YOU']
         
-        sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore')
+        sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore').round(2)
         if 'Debit' in sorted.columns:
-            sorted['Debit'] = sorted['Debit'].abs().round(2) 
+            sorted['Debit'] = sorted['Debit'].abs()
         
         sorted['Category'] = sorted['Category'].fillna('Uncategorized')
         
         grouped_sum, grouped_entries = group_and_summarize(sorted, 'Category', 'Debit')
-        print_table(grouped_sum, title="Grouped Summary by Category", max_col_widths=max_col_widths)
 
         for cat, group_df in grouped_entries:
             cat_sum = group_df['Debit'].sum().round(2)
             summary_stats = {'Debit': f"Sum: {cat_sum}"}
             print_table(group_df,title=f"Entries for Category: {cat}", sum=summary_stats, max_col_widths=max_col_widths)
 
-        sorted = sorted.sort_values(by='Debit', ascending = False)
+        
+        print_table(grouped_sum, title="Grouped Summary by Category", max_col_widths=max_col_widths)
+        sorted = sorted.sort_values(by='Debit', ascending = False).round(2)
         spent = sorted['Debit'].sum()
+        print(f"Total spent: {spent}")
+        
         print_table(sorted)
         print(len(sorted))
         print(f"Total spend this month: {spent}")
