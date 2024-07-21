@@ -47,6 +47,18 @@ budget = {
     'Uncategorized': 100,
 }
 
+def summarize_column(df, column_name):
+    summary = {
+        'sum': df[column_name].sum(),
+        'mean': df[column_name].mean(),
+        'median': df[column_name].median(),
+        'min': df[column_name].min(),
+        'max': df[column_name].max(),
+        'count': df[column_name].count()
+    }
+    return summary
+
+
 def assign_category(row, keyword_to_category):
     description = row['Description']
     current_category = row['Category']
@@ -161,8 +173,20 @@ def main():
         if 'Debit' in sorted.columns:
             sorted['Debit'] = sorted['Debit'].abs()
         
+        # Calculate total sum
+    
         sorted = update_uncategorized_entries(sorted, keyword_to_category)
         
+        total_sum = summarize_column(sorted, 'Debit')
+        print(f"Total Sum of 'Debit' column: {total_sum}")
+        category_totals = sorted.groupby('Category')['Debit'].sum().sort_values(ascending=False)
+        largest_spending_category = category_totals.idxmax()
+        largest_spending_amount = category_totals.max()
+        # Print the summary
+        summaryReport = "\nSummary Report" + "\n--------------" + f"\nTotal Spending: ${total_sum.get('sum').round(2)}\nLargest Purchase: ${total_sum.get('max')}\nPurchase #: {total_sum.get('count')} "
+        
+        
+
         grouped_sum, grouped_entries = group_and_summarize(sorted, 'Category', 'Debit')
 
         for cat, group_df in grouped_entries:
@@ -171,14 +195,16 @@ def main():
             print_table(group_df,title=f"{cat}: ${cat_sum}", sum=summary_stats, max_col_widths=max_col_widths)
 
         
-        print_table(grouped_sum, title="Grouped Summary by Category", max_col_widths=max_col_widths)
+    
         sorted = sorted.sort_values(by='Debit', ascending = False).round(2)
         spent = sorted['Debit'].sum().round(2)
         print(f"Total spent: ${spent}")
-        
         print_table(sorted.sort_values(by='Category', ascending = True))
         print(len(sorted))
-        print(f"Total spend this month: ${spent}")
+        print(f"{summaryReport}")
+        print(f"Largest Spending Category: {largest_spending_category} (${largest_spending_amount:.2f})\n")
+        print_table(grouped_sum, max_col_widths=max_col_widths)
+        
             
     else: 
         print("No CSV files were found/all files couldn't be read.")
