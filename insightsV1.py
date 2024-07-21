@@ -8,8 +8,25 @@ max_col_widths = {
     'Transaction Date': {'min': 2, 'max': 3},
     'Category': {'min': 44, 'max': 45},
     'Debit': {'min': 5, 'max': 15},
-    'Description': {'min': 9, 'max': 25},
+    'Description': {'min': 9, 'max': 30},
     'Card No.': {'min': 5, 'max': 7}
+}
+
+keyword_to_category = {
+    'Coffee': ['cafe', 'forge', 'caffe', 'coffee', 'rustica', 'starbucks', 'dunkin'],
+    'Transportation': ['Uber', 'uber', 'UBER', 'bus', 'lyft','mbta', 'tripshot'],
+    'Dining': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine'],
+    'Groceries': ['market', 'target', 'bonus', 'cambridge nat', 'whole foods', 'cvs', 'trader joe'],
+    'Travel':['explorer', 'american', 'gulf'],
+    'Gear': ['arcteryx'],
+    'Alco': ['seven hills'],
+    'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple']
+}
+
+cards = {
+    'Chase': '1835',
+    'Cap1Silver': '8976',
+    'AMEX': ''
 }
 
 budget = {
@@ -29,6 +46,30 @@ budget = {
     'Fees & Adjustments': 100,
     'Uncategorized': 100,
 }
+
+def assign_category(row, keyword_to_category):
+    description = row['Description']
+    current_category = row['Category']
+    
+    if pd.isnull(description) or description.strip() == '':
+        return 'Uncategorized'
+    
+    description = description.lower()
+    for category, keywords in keyword_to_category.items():
+        if any(keyword in description for keyword in keywords):
+            return category
+    if pd.notnull(current_category) and current_category.strip() != '':
+        if current_category == 'Merchandise':
+            return 'Shopping'
+        else:
+            return current_category
+    
+    return 'Uncategorized'
+
+def update_uncategorized_entries(df, keyword_to_category):
+    df['Category'] = df.apply(lambda row: assign_category(row, keyword_to_category), axis=1)
+    return df
+
 def parse_dates(dates):
     formatted_dates = []
 
@@ -114,30 +155,30 @@ def main():
         filtered = combined_df.dropna(subset=["Debit"])
         if filtered.columns.__contains__ == 'Type':
             filtered = filtered[filtered['Type'] != 'Payment']
-        filtered = filtered[filtered['Description'] != 'MOBILE PAYMENT - THANK YOU']
+        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Payment Thank You-Mobile')]
         
         sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore').round(2)
         if 'Debit' in sorted.columns:
             sorted['Debit'] = sorted['Debit'].abs()
         
-        sorted['Category'] = sorted['Category'].fillna('Uncategorized')
+        sorted = update_uncategorized_entries(sorted, keyword_to_category)
         
         grouped_sum, grouped_entries = group_and_summarize(sorted, 'Category', 'Debit')
 
         for cat, group_df in grouped_entries:
             cat_sum = group_df['Debit'].sum().round(2)
-            summary_stats = {'Debit': f"Sum: {cat_sum}"}
-            print_table(group_df,title=f"Entries for Category: {cat}", sum=summary_stats, max_col_widths=max_col_widths)
+            summary_stats = {'Debit': f"::{cat_sum}"}
+            print_table(group_df,title=f"{cat}: ${cat_sum}", sum=summary_stats, max_col_widths=max_col_widths)
 
         
         print_table(grouped_sum, title="Grouped Summary by Category", max_col_widths=max_col_widths)
         sorted = sorted.sort_values(by='Debit', ascending = False).round(2)
-        spent = sorted['Debit'].sum()
-        print(f"Total spent: {spent}")
+        spent = sorted['Debit'].sum().round(2)
+        print(f"Total spent: ${spent}")
         
-        print_table(sorted)
+        print_table(sorted.sort_values(by='Category', ascending = True))
         print(len(sorted))
-        print(f"Total spend this month: {spent}")
+        print(f"Total spend this month: ${spent}")
             
     else: 
         print("No CSV files were found/all files couldn't be read.")
