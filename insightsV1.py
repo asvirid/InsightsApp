@@ -15,14 +15,19 @@ max_col_widths = {
 keyword_to_category = {
     'Coffee': ['cafe', 'forge', 'caffe', 'coffee', 'rustica', 'starbucks', 'dunkin'],
     'Transportation': ['Uber', 'uber', 'UBER', 'bus', 'lyft','mbta', 'tripshot', 'rail', 'parking'],
-    'Dining': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine'],
+    'Dining Out': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine'],
     'Groceries': ['market', 'target', 'bonus', 'cambridge nat', 'whole foods', 'cvs', 'trader joe'],
+    'Shopping - amazon': ['amazon', 'amzn'],
+    'Shopping - cosmetics': ['sephora'],
+    'Shopping - clothes': ['aritzia', 'lululemon', 'alo-yoga', 'uniqlo'],
     'Travel/Flights':['explorer', 'american', 'gulf', 'yarts'],
     'Health & Wellness': ['orthodontics'],
-    'Gear': ['arcteryx'],
+    'Gear': ['arcteryx', 'backcountry'],
     'Alco': ['seven hills'],
     'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple', 'peacock', 'amazon prime'],
-    'Therapy':['smartglocal']
+    'Therapy':['smartglocal'],
+    'Taxes':['intuit'],
+    'Maintenance/Repairs': ['bicycle belle']
 }
 
 cards = {
@@ -168,10 +173,10 @@ def main():
     if csv_files:
         combined_df = pd.concat(csv_files, ignore_index=True)
         filtered = combined_df.dropna(subset=["Debit"])
-        if filtered.columns.__contains__ == 'Type':
-            filtered = filtered[filtered['Type'] != 'Payment']
-        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Payment Thank You-Mobile') &(filtered['Description'] != 'Returned Mobile ACH Payme')]
-        
+        if 'Type' in filtered.columns:
+            filtered = filtered[(filtered['Type'] != 'Payment') & (filtered['Type'] != 'Return')]
+        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Returned Mobile ACH Payme')]
+    
         sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore').round(2)
         if 'Debit' in sorted.columns:
             sorted['Debit'] = sorted['Debit'].abs()
