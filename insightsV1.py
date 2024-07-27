@@ -14,19 +14,22 @@ max_col_widths = {
 
 keyword_to_category = {
     'Coffee': ['cafe', 'forge', 'caffe', 'coffee', 'rustica', 'starbucks', 'dunkin'],
-    'Transportation': ['Uber', 'uber', 'UBER', 'bus', 'lyft','mbta', 'tripshot'],
+    'Transportation': ['Uber', 'uber', 'UBER', 'bus', 'lyft','mbta', 'tripshot', 'rail', 'parking'],
     'Dining': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine'],
     'Groceries': ['market', 'target', 'bonus', 'cambridge nat', 'whole foods', 'cvs', 'trader joe'],
-    'Travel':['explorer', 'american', 'gulf'],
+    'Travel/Flights':['explorer', 'american', 'gulf', 'yarts'],
+    'Health & Wellness': ['orthodontics'],
     'Gear': ['arcteryx'],
     'Alco': ['seven hills'],
-    'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple']
+    'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple', 'peacock', 'amazon prime'],
+    'Therapy':['smartglocal']
 }
 
 cards = {
-    'Chase': '1835',
+    'Cap1Savor': '1835',
     'Cap1Silver': '8976',
-    'AMEX': ''
+    'AMEX': 'amex',
+    'chase':'chase'
 }
 
 budget = {
@@ -167,7 +170,7 @@ def main():
         filtered = combined_df.dropna(subset=["Debit"])
         if filtered.columns.__contains__ == 'Type':
             filtered = filtered[filtered['Type'] != 'Payment']
-        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Payment Thank You-Mobile')]
+        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Payment Thank You-Mobile') &(filtered['Description'] != 'Returned Mobile ACH Payme')]
         
         sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore').round(2)
         if 'Debit' in sorted.columns:
@@ -183,7 +186,7 @@ def main():
         largest_spending_category = category_totals.idxmax()
         largest_spending_amount = category_totals.max()
         # Print the summary
-        summaryReport = "\nSummary Report" + "\n--------------" + f"\nTotal Spending: ${total_sum.get('sum').round(2)}\nLargest Purchase: ${total_sum.get('max')}\nPurchase #: {total_sum.get('count')} "
+        summaryReport = "\nSummary Report" + "\n--------------" + f"\nTotal Spending: ${total_sum.get('sum').round(2)}\nLargest Purchase: ${total_sum.get('max')}\n#Purchases: {total_sum.get('count')} "
         
         
 
