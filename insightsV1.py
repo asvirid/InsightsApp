@@ -76,7 +76,7 @@ def main():
     dir = "/Users/nafanya/Desktop/statements_insights/" + month
     csv_files = read_files(dir)
 
-    if True:
+    if csv_files.notnull:
         #populate the card number column 
         combined_df = csv_files
         filtered = combined_df.dropna(subset=["Debit"])
