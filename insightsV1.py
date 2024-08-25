@@ -12,29 +12,31 @@ max_col_widths = {
     'Card No.': {'min': 5, 'max': 7}
 }
 
+#add keywords from the description column to associate with some specific category
 keyword_to_category = {
-    'Coffee': ['cafe', 'forge', 'caffe', 'coffee', 'rustica', 'starbucks', 'dunkin'],
+    'Coffee': ['cafe', 'forge', 'caffe', 'coffee', 'rustica', 'starbucks', 'dunkin', 'tatte'],
     'Transportation': ['Uber', 'uber', 'UBER', 'bus', 'lyft','mbta', 'tripshot', 'rail', 'parking'],
-    'Dining Out': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine'],
+    'Dining Out': ['restaurant', 'diner', 'life aliv', 'bagel', 'doorda', 'chipotle', 'dine', 'yvonne', 'widowmaker', 'andbrighton'],
     'Groceries': ['market', 'target', 'bonus', 'cambridge nat', 'whole foods', 'cvs', 'trader joe'],
     'Shopping - amazon': ['amazon', 'amzn'],
     'Shopping - cosmetics': ['sephora'],
     'Shopping - clothes': ['aritzia', 'lululemon', 'alo-yoga', 'uniqlo'],
-    'Travel/Flights':['explorer', 'american', 'gulf', 'yarts'],
+    'Travel/Flights':['explorer', 'american', 'gulf', 'yarts', 'yosemite', 'fresno', 'airport', 'phoenix'],
     'Health & Wellness': ['orthodontics'],
     'Gear': ['arcteryx', 'backcountry'],
-    'Alco': ['seven hills'],
-    'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple', 'peacock', 'amazon prime'],
+    'Alco': ['seven hills'], 
+    'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple', 'peacock', 'amazon prime', 'renewal membership fee'],
     'Therapy':['smartglocal'],
     'Taxes':['intuit'],
     'Maintenance/Repairs': ['bicycle belle']
 }
 
 cards = {
-    'Cap1Savor': '1835',
-    'Cap1Silver': '8976',
-    'AMEX': 'amex',
-    'chase':'chase'
+    'transaction_download': 'cap1',
+    '8976': 'cap1Silver',
+    '0052':'reserve',
+    '6007':'freedom',
+    'activity': 'amex'
 }
 
 budget = {
@@ -130,11 +132,20 @@ def read_files(dir):
             df.rename(columns=column_mapping, inplace=True)
             if 'Date' in df.columns:
                 df['Date'] = parse_dates(df['Date'])
+            
+            filename = os.path.basename(filepath).lower()
+            cardname = 'unknown'
+            for card in cards:
+                if card in filename:
+                    cardname = cards[card]
+                    break
+            df['Card No.'] = cardname
             dataframes.append(df)
 
         except Exception as e:
             print(f"Error reading {filepath}: {e}")
-    return dataframes
+    final_df = pd.concat(dataframes, ignore_index=True)
+    return final_df
 
 def truncate_string(s, max_len, min_len):
     s = str(s)
@@ -163,6 +174,7 @@ def group_and_summarize(df, group_by_col, sum_col):
     return grouped, grouped_entries
 
 
+
 def main():
     print("i am working!")
     #dir = input("Where are your bank statements csvs? (provide the filepath in the format of /Users/user/Path/toYour/folder without "")\n")
@@ -170,12 +182,13 @@ def main():
     dir = "/Users/nafanya/Desktop/statements_insights/" + month
     csv_files = read_files(dir)
 
-    if csv_files:
-        combined_df = pd.concat(csv_files, ignore_index=True)
+    if True:
+        #populate the card number column 
+        combined_df = csv_files
         filtered = combined_df.dropna(subset=["Debit"])
         if 'Type' in filtered.columns:
             filtered = filtered[(filtered['Type'] != 'Payment') & (filtered['Type'] != 'Return')]
-        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Returned Mobile ACH Payme')]
+        filtered = filtered[(filtered['Description'] != 'MOBILE PAYMENT - THANK YOU') & (filtered['Description'] != 'Returned Mobile ACH Payme')& (filtered['Description'] != 'AMEX Dining Credit')]
     
         sorted = filtered.drop(columns=['Type', 'Credit', 'Posted on'], errors ='ignore').round(2)
         if 'Debit' in sorted.columns:
@@ -191,7 +204,7 @@ def main():
         largest_spending_category = category_totals.idxmax()
         largest_spending_amount = category_totals.max()
         # Print the summary
-        summaryReport = "\nSummary Report" + "\n--------------" + f"\nTotal Spending: ${total_sum.get('sum').round(2)}\nLargest Purchase: ${total_sum.get('max')}\n#Purchases: {total_sum.get('count')} "
+        summaryReport = "\nSummary Report" + "\n--------------" + f"\nYou spent ${total_sum.get('sum').round(2)} this {month}\nYour largest purchase was ${total_sum.get('max')}\nYou made {total_sum.get('count')} purchases in total this month"
         
         
 
@@ -210,7 +223,7 @@ def main():
         print_table(sorted.sort_values(by='Category', ascending = True))
         print(len(sorted))
         print(f"{summaryReport}")
-        print(f"Largest Spending Category: {largest_spending_category} (${largest_spending_amount:.2f})\n")
+        print(f"Your largest Spending Category was '{largest_spending_category}' (${largest_spending_amount:.2f})\n")
         print_table(grouped_sum, max_col_widths=max_col_widths)
         
             
