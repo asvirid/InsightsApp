@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 import glob 
-from utiliies.utils import parse_dates
-from utiliies.mappings import cards
+from utils.utils import parse_dates
+from utils.mappings import cards
 
 def read_files(dir):
     dataframes = []
