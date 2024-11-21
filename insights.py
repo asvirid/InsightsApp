@@ -1,9 +1,7 @@
-import os
 import pandas as pd
 import sys
 from utils.constants import * 
 from utils.utils import *
-import glob 
 from tabulate import tabulate
 from utils.mappings import max_col_widths, keyword_to_category
 from reader.file_reader import read_files
@@ -18,7 +16,6 @@ def summarize_column(df, column_name):
         'count': df[column_name].count()
     }
     return summary
-
 
 def assign_category(row, keyword_to_category):
     description = row['Description']
@@ -67,8 +64,8 @@ def print_total_summary(sorted, spent):
     print(f"Total spent: ${spent}")
     print_table(sorted.sort_values(by='Category', ascending = True))
 
-def main(monthInput):
-    dir = "/Users/nafanya/Desktop/statements_insights/" + monthInput
+def main(path, monthInput):
+    dir = path + monthInput
     csv_files = read_files(dir)
 
     if csv_files.notnull:
@@ -117,7 +114,7 @@ def main(monthInput):
         print("No CSV files were found/all files couldn't be read.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print("Please provide a folder name with statements you would like to analyze.")
         sys.exit(1)
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
