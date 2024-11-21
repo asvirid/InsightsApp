@@ -1,4 +1,4 @@
-from constants import * 
+from utiliies.constants import * 
 max_col_widths = {
     'Transaction Date': {'min': 2, 'max': 3},
     'Category': {'min': 44, 'max': 45},
