@@ -21,6 +21,8 @@ Insights App is a python app to show a summary and categorization of your bank t
     
    `<folder>`: Name of the folder.
 
+   E.g  `insights.py /Users/nafanya/Desktop/statements_insights/ august `
+
 ### Additional configurations:
 You can customize categories to better organize your insights:
 

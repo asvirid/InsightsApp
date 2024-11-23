@@ -1,10 +1,11 @@
 from utils.constants import * 
 max_col_widths = {
     'Transaction Date': {'min': 2, 'max': 3},
-    'Category': {'min': 44, 'max': 45},
+    'Category': {'min': 15, 'max': 37},
     'Debit': {'min': 5, 'max': 15},
-    'Description': {'min': 9, 'max': 30},
-    'Card No.': {'min': 5, 'max': 7}
+    'Description': {'min': 24, 'max': 24},
+    'Card No.': {'min': 4, 'max': 8},
+    'Date': {'min': 10, 'max': 10}
 }
 
 #add keywords from the description column to associate with some specific category
@@ -17,15 +18,16 @@ keyword_to_category = {
     'Groceries': ['market', 'target', 'bonus', 'whole foods', 'trader joe'],
     'Groceries - snacks': ['cambridge nat'],
     'Groceries - pharma/cvs': ['cvs'],
-    f'{PEACH_CORAL}Shopping - amazon{RESET}': ['amazon', 'amzn'],
-    f'{PEACH_CORAL}Shopping - cosmetics{RESET}': ['sephora', 'lush'],
-    f'{PEACH_CORAL}Shopping - clothes{RESET}': ['aritzia', 'lululemon', 'alo-yoga', 'uniqlo', 'anthropologie', 'sunglass', 'cos'],
+    'Shopping': ['papersource'],
+    'Shopping - amazon': ['amazon', 'amzn'],
+    'Shopping - cosmetics': ['sephora', 'lush'],
+    'Shopping - clothes': ['aritzia', 'lululemon', 'alo-yoga', 'uniqlo', 'anthropologie', 'sunglass', 'cos'],
     'Shopping - gifts': ['nuts factory', 'zion outfitter', 'le macaron cacambridge'],
-    f'{PEACH_CORAL}Shopping - temu{RESET}':['temu'],
+    'Shopping - temu':['temu'],
     'Shopping - Gear': ['arcteryx', 'backcountry', 'rei', 'nike'],
     'Shopping - bookshops': ['coop', 'books'], 
     'Travel/Flights':['explorer', 'american', 'gulf', 'yarts', 'yosemite', 'fresno', 'airport', 'phoenix'],
-    'Health Care': ['orthodontics', 'asthma ctr'],
+    'Healthcare': ['orthodontics', 'asthma ctr'],
     'Alco': ['seven hills'], 
     'Subscriptions': ['fitrec', 'down under', 'babbel', 'spotify', 'adobe', 'apple', 'peacock', 'amazon prime', 'renewal membership fee', 'magic util', 'calm.com'],
     'Therapy':['smartglocal'],

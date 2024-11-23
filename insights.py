@@ -5,6 +5,7 @@ from utils.utils import *
 from tabulate import tabulate
 from utils.mappings import max_col_widths, keyword_to_category
 from reader.file_reader import read_files
+from utils.mappings import budget
 
 def summarize_column(df, column_name):
     summary = {
@@ -27,16 +28,39 @@ def assign_category(row, keyword_to_category):
     description = description.lower()
     for category, keywords in keyword_to_category.items():
         if any(keyword in description for keyword in keywords):
-            return category
+            current_category = category
     if pd.notnull(current_category) and current_category.strip() != '':
         if current_category == 'Merchandise':
-            return 'Shopping'
+            current_category =  'Shopping'
+        if current_category == 'Health care' or current_category == 'Healthcare' or current_category == 'Health Care':
+            current_category = 'Healthcare'
         if current_category == 'Food & Drink':
-            return 'Dining'
+            current_category = 'Dining'
         else:
-            return current_category
-    
-    return 'Uncategorized'
+            current_category =  current_category
+    #color categories:
+    if 'Shopping' in current_category:
+        return f'{PEACH_CORAL}{current_category}{RESET}'
+    elif 'Groceries' in current_category:
+        return f'{SKY_BLUE}{current_category}{RESET}'
+    elif 'Dining' in current_category:
+        return f'{SKY_BLUE}{current_category}{RESET}'
+    elif 'Healthcare' in current_category:
+        return f'{BRIGHT_PINK}{current_category}{RESET}'
+    elif 'Personal' in current_category:
+        return f'{BRIGHT_PINK}{current_category}{RESET}'
+    elif 'Transportation' in current_category:
+        return f'{SUNNY_YELLOW}{current_category}{RESET}'
+    elif 'Subscriptions' in current_category:
+        return f'{MINT_GREEN}{current_category}{RESET}'
+    elif 'Coffee' in current_category:
+        return f'{PURPLE_ORCHID}{current_category}{RESET}'
+    elif 'Alco' in current_category:
+        return f'{PURPLE_ORCHID}{current_category}{RESET}'
+    if(current_category != ''):
+        return current_category
+    else:
+        return 'Uncategorized'
 
 def update_uncategorized_entries(df, keyword_to_category):
     df['Category'] = df.apply(lambda row: assign_category(row, keyword_to_category), axis=1)
@@ -50,18 +74,18 @@ def group_and_summarize(df, group_by_col, sum_col, sum_cat_month):
     return grouped, grouped_entries, grouped_by_month
 
 def print_summary_report(total_sum, cat, amt, month):
-        summaryReport = f"{TEAL_BLUE}Summary Report{RESET}" + "\n--------------" + f"\nYou spent ${total_sum.get('sum').round(2)} this {month}\nYour largest purchase was ${total_sum.get('max')}\nYou made {total_sum.get('count')} purchases in total this month"
+        summaryReport = f"    {TEAL_BLUE}Summary Report{RESET}" + "\n    --------------" + f"\n    You spent ${total_sum.get('sum').round(2)} this {month}\n    Your largest purchase was ${total_sum.get('max')}\n    You made {total_sum.get('count')} purchases in total this month"
         print(f"{ summaryReport }")
-        print(f"Your largest Spending Category was '{cat}' (${amt:.2f})\n")
+        print(f"    Your largest Spending Category was '{cat}' (${amt:.2f})\n")
 
 def print_categories(grouped_entries):
     for cat, group_df in grouped_entries:
             cat_sum = group_df['Debit'].sum().round(2)
             summary_stats = {'Debit': f"::{cat_sum}"}
-            print_table(group_df,title=f"{cat}: ${cat_sum}", sum=summary_stats, max_col_widths=max_col_widths)
+            print_sub_table(group_df,title=f"{cat}: ${cat_sum}", sum=summary_stats, max_col_widths=max_col_widths)
 
-def print_total_summary(sorted, spent):
-    print(f"Total spent: ${spent}")
+def print_total_summary(sorted, spent, totals, budget):
+    print(f"    Total spent: ${spent}")
     print_table(sorted.sort_values(by='Category', ascending = True))
 
 def main(path, monthInput):
@@ -99,7 +123,7 @@ def main(path, monthInput):
 
         sorted = sorted.sort_values(by='Debit', ascending = False).round(2)
         spent = sorted['Debit'].sum().round(2)
-        print_total_summary(sorted, spent)
+        print_total_summary(sorted, spent, category_totals, budget)
         
         #print_table(sorted.sort_values(by='Date', ascending = True))
         print(len(sorted))
